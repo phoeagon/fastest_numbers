@@ -1,4 +1,5 @@
 import math
+import enum
 
 
 one_names = [
@@ -48,8 +49,18 @@ superscripts = ['⁰','¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹',
                 '¹⁰','¹¹','¹²','¹³','¹⁴','¹⁵','¹⁶','¹⁷','¹⁸','¹⁹',
                 '²⁰','²¹','²²','²³']
 
+
+# pemdas indices: 0 ordinal, 1 original, 2 exponent, 3 multiplication, 4 division, 5 addition and subtraction
+class Priority(enum.Enum):
+    ORDINAL = 0
+    ORIGINAL = 1
+    EXPONENT = 2
+    MULTIPLICATION = 3
+    DIVISION = 4
+    ADDITION_SUBTRACTION = 5
+
 number_names = []
-pemdas_count = 6
+pemdas_count = max((i.value for i in Priority)) + 1
 
 
 def base_syllables(n):
@@ -138,18 +149,29 @@ def number_names_generator(leave_point,max_number):
 
     # pemdas indices: 0 ordinal, 1 original, 2 exponent, 3 multiplication, 4 division, 5 addition and subtraction
     unary = [
-        {"id": "²", "syllables": 1, "text": " squared", "value": 2, "pemdas_input": 2,"pemdas_result": 2},
-        {"id": "³", "syllables": 1, "text": " cubed", "value": 3, "pemdas_input": 2,"pemdas_result": 2},
+        {"id": "²", "syllables": 1, "text": " squared", "value": 2, "pemdas_input": Priority.EXPONENT.value, "pemdas_result": Priority.EXPONENT.value},
+        {"id": "³", "syllables": 1, "text": " cubed", "value": 3, "pemdas_input": Priority.EXPONENT.value, "pemdas_result": Priority.EXPONENT.value},
     ]
     
     binary = [
-        { "id": "+", "syllables": 1, "text": " plus ", "suffix": "", "pemdas_left": 5,"pemdas_right": 5,"pemdas_result": 5},
-        { "id": "*", "syllables": 1, "text": " times ", "suffix": "", "pemdas_left": 3,"pemdas_right": 4,"pemdas_result": 4},
-        { "id": "*", "syllables": 1, "text": " times ", "suffix": "", "pemdas_left": 3,"pemdas_right": 3,"pemdas_result": 3},
-        { "id": "-", "syllables": 2, "text": " minus ", "suffix": "", "pemdas_left": 5,"pemdas_right": 4,"pemdas_result": 5},
-        { "id": "/", "syllables": 2, "text": " over ", "suffix": "", "pemdas_left": 3,"pemdas_right": 2,"pemdas_result": 4},
-        { "id": "fraction", "syllables": 0, "text": " ", "suffix": "s", "pemdas_left": 2,"pemdas_right": 0,"pemdas_result": 2},
-        { "id": "^", "syllables": 2, "text": " to the ", "suffix": "","pemdas_left": 2, "pemdas_right": 0,"pemdas_result": 2},
+        { "id": "+", "syllables": 1, "text": " plus ", "suffix": "", 
+        "pemdas_left": Priority.ADDITION_SUBTRACTION.value,"pemdas_right": Priority.ADDITION_SUBTRACTION.value,"pemdas_result": Priority.ADDITION_SUBTRACTION.value},
+        { "id": "*", "syllables": 1, "text": " times ", "suffix": "", 
+        "pemdas_left": Priority.MULTIPLICATION.value,"pemdas_right": Priority.DIVISION.value,"pemdas_result": Priority.DIVISION.value},
+        { "id": "*", "syllables": 1, "text": " times ", "suffix": "", 
+        "pemdas_left": Priority.MULTIPLICATION.value,"pemdas_right": Priority.MULTIPLICATION.value,"pemdas_result": Priority.MULTIPLICATION.value},
+        { "id": "-", "syllables": 2, "text": " minus ", "suffix": "", 
+        "pemdas_left": Priority.ADDITION_SUBTRACTION.value,
+        "pemdas_right": Priority.DIVISION.value,"pemdas_result": Priority.ADDITION_SUBTRACTION.value},
+        # Multiplication has higher priority (lower value). note pemdas_left has priority than pemdas_right, so will prioritize binding to the left.
+        # Not really used in original results.
+        { "id": "/", "syllables": 2, "text": " over ", "suffix": "", 
+        "pemdas_left": Priority.MULTIPLICATION.value,"pemdas_right": Priority.EXPONENT.value,"pemdas_result": Priority.DIVISION.value},
+        { "id": "fraction", "syllables": 0, "text": " ", "suffix": "s", 
+        "pemdas_left": Priority.EXPONENT.value,"pemdas_right": Priority.ORDINAL.value,"pemdas_result": Priority.EXPONENT.value},
+        # Note that pemdas_left is lower priority (higher value), meaning it prioritize binding to the right
+        { "id": "^", "syllables": 2, "text": " to the ", "suffix": "",
+        "pemdas_left": Priority.EXPONENT.value, "pemdas_right": Priority.ORDINAL.value,"pemdas_result": Priority.EXPONENT.value},
     ]
 
     min_missing = 1
