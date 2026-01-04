@@ -223,6 +223,8 @@ def number_names_generator(leave_point, max_number):
             "pemdas_input": Priority.EXPONENT.value, "pemdas_result": Priority.EXPONENT.value},
         {"id": "!", "syllables": 4, "text": " factorial", "value": None,
             "pemdas_input": Priority.EXPONENT.value, "pemdas_result": Priority.EXPONENT.value},
+        {"id": "%", "syllables": 2, "text": " percent", "value": None,
+            "pemdas_input": Priority.EXPONENT.value, "pemdas_result": Priority.EXPONENT.value},
     ]
 
     """
@@ -423,6 +425,8 @@ def get_first_extremes(op, min_missing, max_number):
         return min_missing**(2), max_number**(2)
     elif op["id"] == "x2":
         return min_missing//2, max_number//2
+    elif op["id"] == "%":
+        return min_missing*100, max_number*100
     elif op["id"] == "!":
         return inverse_factorial(min_missing - 1) + 1, inverse_factorial(max_number)
     elif op["id"] == "+":
@@ -488,6 +492,11 @@ def get_output(op, left_value, right_value=0):
         if abs(v**2 - left_value) < 0.00001:
             return v, True
         return 0, False
+    elif op["id"] == "%":
+        if left_value % 100 != 0:
+            # invalid
+            return 0, False
+        return left_value//100, True
     if op["id"] == "!":
         return math.factorial(left_value), True
     elif op["id"] == "^":
