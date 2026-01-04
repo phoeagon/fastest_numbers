@@ -1,6 +1,43 @@
 import math
 import enum
 
+def approx_inverse_factorial(x):
+    """
+    Returns an approximation of n such that n! = x.
+    Uses Stirling's approximation: ln(n!) ≈ n*ln(n) - n + 0.5*ln(2*pi*n)
+    """
+    if x < 1:
+        return 0
+    if x <= 1:
+        return 1
+    if x <= 2:
+        return 2
+    
+    ln_x = math.log(x)
+    n = ln_x / math.log(ln_x) if ln_x > 1 else 2.0
+    for _ in range(5):
+        f = (n + 0.5) * math.log(n) - n + 0.5 * math.log(2 * math.pi) - ln_x
+        df = math.log(n) + 0.5 / n
+        n = n - f / df
+        if n < 1: n = 1
+        
+    return n
+
+def inverse_factorial(x):
+    """
+    Returns the largest integer n such that n! <= x.
+    """
+    if x < 1:
+        return 0
+    res = 1
+    n = 1
+    while True:
+        next_res = res * (n + 1)
+        if next_res > x:
+            return n
+        res = next_res
+        n += 1
+
 
 one_names = [
     [["zero", 2], ["zeroeth", 2]],
@@ -156,6 +193,8 @@ def number_names_generator(leave_point, max_number):
         {"id": "²", "syllables": 1, "text": " squared", "value": 2,
             "pemdas_input": Priority.EXPONENT.value, "pemdas_result": Priority.EXPONENT.value},
         {"id": "³", "syllables": 1, "text": " cubed", "value": 3,
+            "pemdas_input": Priority.EXPONENT.value, "pemdas_result": Priority.EXPONENT.value},
+        {"id": "!", "syllables": 4, "text": " factorial", "value": None,
             "pemdas_input": Priority.EXPONENT.value, "pemdas_result": Priority.EXPONENT.value},
     ]
 
@@ -351,6 +390,8 @@ def get_first_extremes(op, min_missing, max_number):
         return min_missing**(1/2), max_number**(1/2)
     elif op["id"] == "³":
         return min_missing**(1/3), max_number**(1/3)
+    elif op["id"] == "!":
+        return inverse_factorial(min_missing - 1) + 1, inverse_factorial(max_number)
     elif op["id"] == "+":
         return 6, max_number-1
     elif op["id"] == "*":
@@ -395,6 +436,8 @@ def get_output(op, left_value, right_value=0):
         return left_value**2, True
     if op["id"] == "³":
         return left_value**3, True
+    if op["id"] == "!":
+        return math.factorial(left_value), True
     elif op["id"] == "^":
         return left_value**right_value, True
     elif op["id"] == "+":
