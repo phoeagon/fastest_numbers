@@ -271,6 +271,9 @@ def number_names_generator(leave_point, max_number):
         {"id": "-", "syllables": 2, "text": " minus ", "suffix": "",
          "pemdas_left": Priority.ADDITION_SUBTRACTION.value,
          "pemdas_right": Priority.DIVISION.value, "pemdas_result": Priority.ADDITION_SUBTRACTION.value},
+        {"id": "-", "syllables": 1, "text": " sans ", "suffix": "",
+         "pemdas_left": Priority.ADDITION_SUBTRACTION.value,
+         "pemdas_right": Priority.DIVISION.value, "pemdas_result": Priority.ADDITION_SUBTRACTION.value},
         # Multiplication has higher priority (lower value). note pemdas_left has priority than pemdas_right, so will prioritize binding to the left.
         # Not really used in original results.
         {"id": "/", "syllables": 2, "text": " over ", "suffix": "",
