@@ -1,6 +1,7 @@
 import math
 import enum
 
+
 def approx_inverse_factorial(x):
     """
     Returns an approximation of n such that n! = x.
@@ -12,16 +13,18 @@ def approx_inverse_factorial(x):
         return 1
     if x <= 2:
         return 2
-    
+
     ln_x = math.log(x)
     n = ln_x / math.log(ln_x) if ln_x > 1 else 2.0
     for _ in range(5):
         f = (n + 0.5) * math.log(n) - n + 0.5 * math.log(2 * math.pi) - ln_x
         df = math.log(n) + 0.5 / n
         n = n - f / df
-        if n < 1: n = 1
-        
+        if n < 1:
+            n = 1
+
     return n
+
 
 def inverse_factorial(x):
     """
@@ -37,6 +40,20 @@ def inverse_factorial(x):
             return n
         res = next_res
         n += 1
+
+
+def tetration(base, height):
+    """
+    Calculates the tetration of 'base' to the 'height' (base^^height) iteratively.
+    Height must be a non-negative integer.
+    """
+    if height == 0:
+        return 1
+    result = base
+    # Loop from the second power up to the desired height
+    for _ in range(2, height + 1):
+        result = base ** result
+    return result
 
 
 one_names = [
@@ -80,6 +97,7 @@ large_names = [
     ["thousand", 2, 1000, 3],
     ["million", 2, 1000000, 6],
     ["billion", 2, 1000000000, 9],
+    ["trillion", 2, 1000000000000, 12],
 ]
 
 superscripts = ['⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹',
@@ -190,6 +208,12 @@ def number_names_generator(leave_point, max_number):
 
     # pemdas indices: 0 ordinal, 1 original, 2 exponent, 3 multiplication, 4 division, 5 addition and subtraction
     unary = [
+        # {"id": "x2", "syllables": 2, "text": " doubled", "value": None,
+        #     "pemdas_input": Priority.EXPONENT.value, "pemdas_result": Priority.EXPONENT.value},
+        # {"id": "x3", "syllables": 2, "text": " tripled", "value": None,
+        #     "pemdas_input": Priority.EXPONENT.value, "pemdas_result": Priority.EXPONENT.value},
+        # {"id": "x4", "syllables": 3, "text": " quadrupled", "value": None,
+        #     "pemdas_input": Priority.EXPONENT.value, "pemdas_result": Priority.EXPONENT.value},
         {"id": "²", "syllables": 1, "text": " squared", "value": 2,
             "pemdas_input": Priority.EXPONENT.value, "pemdas_result": Priority.EXPONENT.value},
         {"id": "³", "syllables": 1, "text": " cubed", "value": 3,
@@ -251,6 +275,8 @@ def number_names_generator(leave_point, max_number):
         # Note that pemdas_left is lower priority (higher value), meaning it prioritize binding to the right
         {"id": "^", "syllables": 2, "text": " to the ", "suffix": "",
          "pemdas_left": Priority.EXPONENT.value, "pemdas_right": Priority.ORDINAL.value, "pemdas_result": Priority.EXPONENT.value},
+        # {"id": "^^", "syllables": 2, "text": " up up ", "suffix": "",
+        #  "pemdas_left": Priority.EXPONENT.value, "pemdas_right": Priority.ORDINAL.value, "pemdas_result": Priority.EXPONENT.value},
     ]
 
     min_missing = 1
@@ -390,6 +416,8 @@ def get_first_extremes(op, min_missing, max_number):
         return min_missing**(1/2), max_number**(1/2)
     elif op["id"] == "³":
         return min_missing**(1/3), max_number**(1/3)
+    elif op["id"] == "x2":
+        return min_missing//2, max_number//2
     elif op["id"] == "!":
         return inverse_factorial(min_missing - 1) + 1, inverse_factorial(max_number)
     elif op["id"] == "+":
@@ -398,6 +426,8 @@ def get_first_extremes(op, min_missing, max_number):
         return 2, max_number**0.5
     elif op["id"] == "-":
         return min_missing+1, max_number
+    elif op["id"] == "^^":
+        return 2, max_number**0.5
     elif op["id"] == "/" or op["id"] == "fraction":
         return min_missing*2, max_number
     elif op["id"] == "^":
@@ -429,6 +459,10 @@ def get_second_extremes(op, min_missing, max_number, left_value):
         return 2, left_value/2
     elif op["id"] == "^":
         return 5, math.log(max_number)/math.log(left_value)
+    elif op["id"] == "^^":
+        if left_value <= 2:
+            return 2, 4
+        return 2, 3
 
 
 def get_output(op, left_value, right_value=0):
@@ -436,6 +470,8 @@ def get_output(op, left_value, right_value=0):
         return left_value**2, True
     if op["id"] == "³":
         return left_value**3, True
+    # elif op["id"] == "x2":
+    #     return left_value*2, True
     if op["id"] == "!":
         return math.factorial(left_value), True
     elif op["id"] == "^":
@@ -446,6 +482,8 @@ def get_output(op, left_value, right_value=0):
         return left_value * right_value, True
     elif op["id"] == "-":
         return left_value - right_value, True
+    # elif op["id"] == "^^":
+    #     return tetration(left_value, right_value), True
     elif op["id"] == "/" or op["id"] == "fraction":
         if left_value % right_value == 0:
             return left_value // right_value, True
