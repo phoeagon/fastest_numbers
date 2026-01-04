@@ -214,6 +214,9 @@ def number_names_generator(leave_point, max_number):
         #     "pemdas_input": Priority.EXPONENT.value, "pemdas_result": Priority.EXPONENT.value},
         # {"id": "x4", "syllables": 3, "text": " quadrupled", "value": None,
         #     "pemdas_input": Priority.EXPONENT.value, "pemdas_result": Priority.EXPONENT.value},
+        # pronounce as root
+        {"id": "root2", "syllables": 1, "text": " √", "value": 2,
+            "pemdas_input": Priority.EXPONENT.value, "pemdas_result": Priority.EXPONENT.value},
         {"id": "²", "syllables": 1, "text": " squared", "value": 2,
             "pemdas_input": Priority.EXPONENT.value, "pemdas_result": Priority.EXPONENT.value},
         {"id": "³", "syllables": 1, "text": " cubed", "value": 3,
@@ -416,6 +419,8 @@ def get_first_extremes(op, min_missing, max_number):
         return min_missing**(1/2), max_number**(1/2)
     elif op["id"] == "³":
         return min_missing**(1/3), max_number**(1/3)
+    elif op["id"] == "root2":
+        return min_missing**(2), max_number**(2)
     elif op["id"] == "x2":
         return min_missing//2, max_number//2
     elif op["id"] == "!":
@@ -465,13 +470,24 @@ def get_second_extremes(op, min_missing, max_number, left_value):
         return 2, 3
 
 
+"""
+Returns a tuple of [result, valid].
+Invalid results are returned as False in the second element.
+"""
+
+
 def get_output(op, left_value, right_value=0):
     if op["id"] == "²":
         return left_value**2, True
-    if op["id"] == "³":
+    elif op["id"] == "³":
         return left_value**3, True
     # elif op["id"] == "x2":
     #     return left_value*2, True
+    elif op["id"] == "root2":
+        v = int(math.ceil(math.sqrt(left_value)))
+        if abs(v**2 - left_value) < 0.00001:
+            return v, True
+        return 0, False
     if op["id"] == "!":
         return math.factorial(left_value), True
     elif op["id"] == "^":
