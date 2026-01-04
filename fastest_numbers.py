@@ -39,15 +39,15 @@ ten_names = [
 ]
 
 large_names = [
-    ["hundred",2,100,2],
-    ["thousand",2,1000,3],
-    ["million",2,1000000,6],
-    ["billion",2,1000000000,9],
+    ["hundred", 2, 100, 2],
+    ["thousand", 2, 1000, 3],
+    ["million", 2, 1000000, 6],
+    ["billion", 2, 1000000000, 9],
 ]
 
-superscripts = ['⁰','¹','²','³','⁴','⁵','⁶','⁷','⁸','⁹',
-                '¹⁰','¹¹','¹²','¹³','¹⁴','¹⁵','¹⁶','¹⁷','¹⁸','¹⁹',
-                '²⁰','²¹','²²','²³']
+superscripts = ['⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹',
+                '¹⁰', '¹¹', '¹²', '¹³', '¹⁴', '¹⁵', '¹⁶', '¹⁷', '¹⁸', '¹⁹',
+                '²⁰', '²¹', '²²', '²³']
 
 
 # pemdas indices: 0 ordinal, 1 original, 2 exponent, 3 multiplication, 4 division, 5 addition and subtraction
@@ -59,6 +59,7 @@ class Priority(enum.Enum):
     DIVISION = 4
     ADDITION_SUBTRACTION = 5
 
+
 number_names = []
 pemdas_count = max((i.value for i in Priority)) + 1
 
@@ -69,18 +70,18 @@ def base_syllables(n):
     if n < 100:
         n_mod = n % 10
         n_div = n // 10
-        if n % 10 == 0: 
+        if n % 10 == 0:
             return ten_names[n_div][0][1], ten_names[n_div][0][0], ten_names[n_div][1][1], ten_names[n_div][1][0], 1, 2
 
         return (
-                ten_names[n_div][0][1] + number_names[n_mod]["syllables"][1], 
-                ten_names[n_div][0][0] + "-" + number_names[n_mod]["names"][1],
-                ten_names[n_div][0][1] + number_names[n_mod]["syllables"][0], 
-                ten_names[n_div][0][0] + "-" + number_names[n_mod]["names"][0],
-                0,
-                2
-            )
-        
+            ten_names[n_div][0][1] + number_names[n_mod]["syllables"][1],
+            ten_names[n_div][0][0] + "-" + number_names[n_mod]["names"][1],
+            ten_names[n_div][0][1] + number_names[n_mod]["syllables"][0],
+            ten_names[n_div][0][0] + "-" + number_names[n_mod]["names"][0],
+            0,
+            2
+        )
+
     large_index = 0
     while (large_names[large_index+1][2] <= n):
         large_index += 1
@@ -91,39 +92,43 @@ def base_syllables(n):
     if n_mod == 0:
         return (
             number_names[n_div]["syllables"][1] + large_names[large_index][1],
-            number_names[n_div]["names"][1] + " " + large_names[large_index][0],
+            number_names[n_div]["names"][1] +
+            " " + large_names[large_index][0],
             number_names[n_div]["syllables"][1] + large_names[large_index][1],
-            number_names[n_div]["names"][1] + " " + large_names[large_index][0] + "th",
+            number_names[n_div]["names"][1] + " " +
+            large_names[large_index][0] + "th",
             large_names[large_index][3] + number_names[n_div]["zeroes"],
             large_names[large_index][3] + number_names[n_div]["digits"]
         )
-    
+
     connect_word, connect_syllables = " ", 0
     # if n_mod < 100:
     #     connect_word, connect_syllables = " and ", 1
 
     return (
-        number_names[n_div]["syllables"][1] + large_names[large_index][1] + connect_syllables + number_names[n_mod]["syllables"][1],
-        number_names[n_div]["names"][1] + " " + large_names[large_index][0] + connect_word + number_names[n_mod]["names"][1],
-        number_names[n_div]["syllables"][1] + large_names[large_index][1] + connect_syllables + number_names[n_mod]["syllables"][0],
-        number_names[n_div]["names"][1] + " " + large_names[large_index][0] + connect_word + number_names[n_mod]["names"][0],
+        number_names[n_div]["syllables"][1] + large_names[large_index][1] +
+        connect_syllables + number_names[n_mod]["syllables"][1],
+        number_names[n_div]["names"][1] + " " + large_names[large_index][0] +
+        connect_word + number_names[n_mod]["names"][1],
+        number_names[n_div]["syllables"][1] + large_names[large_index][1] +
+        connect_syllables + number_names[n_mod]["syllables"][0],
+        number_names[n_div]["names"][1] + " " + large_names[large_index][0] +
+        connect_word + number_names[n_mod]["names"][0],
         number_names[n_mod]["zeroes"],
         large_names[large_index][3] + number_names[n_div]["digits"]
     )
-    
 
 
-
-def number_names_generator(leave_point,max_number):
+def number_names_generator(leave_point, max_number):
     max_syllables = 0
 
-    for n in range(0,max_number + 1):
-        n_syllables, n_name, frac_syllables, frac_name, zeroes, digits = base_syllables(n)
+    for n in range(0, max_number + 1):
+        n_syllables, n_name, frac_syllables, frac_name, zeroes, digits = base_syllables(
+            n)
         adj_zeroes = zeroes
         if zeroes > 3:
             adj_zeroes = (zeroes // 3)*3
 
-        
         number_names.append(
             {
                 "value": n,
@@ -134,11 +139,10 @@ def number_names_generator(leave_point,max_number):
                 "zeroes": adj_zeroes,
                 "digits": digits,
                 "nonzero": digits-zeroes,
-                "auto pass": (n%100 < 20 and n%100 > 0) or zeroes < 1 or digits < 3,
+                "auto pass": (n % 100 < 20 and n % 100 > 0) or zeroes < 1 or digits < 3,
             }
         )
         max_syllables = max(max_syllables, n_syllables)
-
 
     number_names[2]["syllables"][0] = 1
     number_names[2]["names"][0] = "halve"
@@ -149,40 +153,76 @@ def number_names_generator(leave_point,max_number):
 
     # pemdas indices: 0 ordinal, 1 original, 2 exponent, 3 multiplication, 4 division, 5 addition and subtraction
     unary = [
-        {"id": "²", "syllables": 1, "text": " squared", "value": 2, "pemdas_input": Priority.EXPONENT.value, "pemdas_result": Priority.EXPONENT.value},
-        {"id": "³", "syllables": 1, "text": " cubed", "value": 3, "pemdas_input": Priority.EXPONENT.value, "pemdas_result": Priority.EXPONENT.value},
+        {"id": "²", "syllables": 1, "text": " squared", "value": 2,
+            "pemdas_input": Priority.EXPONENT.value, "pemdas_result": Priority.EXPONENT.value},
+        {"id": "³", "syllables": 1, "text": " cubed", "value": 3,
+            "pemdas_input": Priority.EXPONENT.value, "pemdas_result": Priority.EXPONENT.value},
     ]
+
+    """
+    When the program combines expressions like:
+        new_expr = left_expr op right_expr
+
+    it checks:
+
+    + Left side: If pemdas_left < precedence of op → needs parentheses
+    + Right side: If pemdas_right ≤ precedence of op → needs parentheses
+    + Resulting expression: pemdas_result = precedence of op
+
+    Used later if this new_expr becomes the left or right side of a bigger operation.
+
+    Example for fraction:
     
+    Step by step reasoning
+
+    pemdas_left = EXPONENT
+
+    The numerator (left) is treated like a “high-binding” expression (as if it were squared or cubed).
+    Why? Because in English, the left is usually read first and attached to the fraction without extra parentheses.
+    Example: "ten squared halves" → left binds strongly, no need for parentheses.
+
+    pemdas_right = ORDINAL
+
+    The denominator is basically an “ordinal word” (half, third, fifth) — low syllable, low precedence in arithmetic sense.
+    We don't want the denominator to get grouped incorrectly with other operators — English grammar handles it naturally.
+    Example: "ten squared halves" → "halves" is like a modifier, not a full arithmetic operation.
+
+    pemdas_result = EXPONENT
+
+    After combining, the fraction expression still binds strongly.
+
+    That is, "ten squared halves" can be used in further operations like "ten squared halves minus 3" without extra parentheses around "ten squared halves".
+    """
     binary = [
-        { "id": "+", "syllables": 1, "text": " plus ", "suffix": "", 
-        "pemdas_left": Priority.ADDITION_SUBTRACTION.value,"pemdas_right": Priority.ADDITION_SUBTRACTION.value,"pemdas_result": Priority.ADDITION_SUBTRACTION.value},
-        { "id": "*", "syllables": 1, "text": " times ", "suffix": "", 
-        "pemdas_left": Priority.MULTIPLICATION.value,"pemdas_right": Priority.DIVISION.value,"pemdas_result": Priority.DIVISION.value},
-        { "id": "*", "syllables": 1, "text": " times ", "suffix": "", 
-        "pemdas_left": Priority.MULTIPLICATION.value,"pemdas_right": Priority.MULTIPLICATION.value,"pemdas_result": Priority.MULTIPLICATION.value},
-        { "id": "-", "syllables": 2, "text": " minus ", "suffix": "", 
-        "pemdas_left": Priority.ADDITION_SUBTRACTION.value,
-        "pemdas_right": Priority.DIVISION.value,"pemdas_result": Priority.ADDITION_SUBTRACTION.value},
+        {"id": "+", "syllables": 1, "text": " plus ", "suffix": "",
+         "pemdas_left": Priority.ADDITION_SUBTRACTION.value, "pemdas_right": Priority.ADDITION_SUBTRACTION.value, "pemdas_result": Priority.ADDITION_SUBTRACTION.value},
+        {"id": "*", "syllables": 1, "text": " times ", "suffix": "",
+         "pemdas_left": Priority.MULTIPLICATION.value, "pemdas_right": Priority.DIVISION.value, "pemdas_result": Priority.DIVISION.value},
+        {"id": "*", "syllables": 1, "text": " times ", "suffix": "",
+         "pemdas_left": Priority.MULTIPLICATION.value, "pemdas_right": Priority.MULTIPLICATION.value, "pemdas_result": Priority.MULTIPLICATION.value},
+        {"id": "-", "syllables": 2, "text": " minus ", "suffix": "",
+         "pemdas_left": Priority.ADDITION_SUBTRACTION.value,
+         "pemdas_right": Priority.DIVISION.value, "pemdas_result": Priority.ADDITION_SUBTRACTION.value},
         # Multiplication has higher priority (lower value). note pemdas_left has priority than pemdas_right, so will prioritize binding to the left.
         # Not really used in original results.
-        { "id": "/", "syllables": 2, "text": " over ", "suffix": "", 
-        "pemdas_left": Priority.MULTIPLICATION.value,"pemdas_right": Priority.EXPONENT.value,"pemdas_result": Priority.DIVISION.value},
-        { "id": "fraction", "syllables": 0, "text": " ", "suffix": "s", 
-        "pemdas_left": Priority.EXPONENT.value,"pemdas_right": Priority.ORDINAL.value,"pemdas_result": Priority.EXPONENT.value},
+        {"id": "/", "syllables": 2, "text": " over ", "suffix": "",
+         "pemdas_left": Priority.MULTIPLICATION.value, "pemdas_right": Priority.EXPONENT.value, "pemdas_result": Priority.DIVISION.value},
+        {"id": "fraction", "syllables": 0, "text": " ", "suffix": "s",
+         "pemdas_left": Priority.EXPONENT.value, "pemdas_right": Priority.ORDINAL.value, "pemdas_result": Priority.EXPONENT.value},
         # Note that pemdas_left is lower priority (higher value), meaning it prioritize binding to the right
-        { "id": "^", "syllables": 2, "text": " to the ", "suffix": "",
-        "pemdas_left": Priority.EXPONENT.value, "pemdas_right": Priority.ORDINAL.value,"pemdas_result": Priority.EXPONENT.value},
+        {"id": "^", "syllables": 2, "text": " to the ", "suffix": "",
+         "pemdas_left": Priority.EXPONENT.value, "pemdas_right": Priority.ORDINAL.value, "pemdas_result": Priority.EXPONENT.value},
     ]
 
     min_missing = 1
     for s in range(1, max_syllables + 1):
-        print("searching", s, "syllables, at",min_missing)
+        print("searching", s, "syllables, at", min_missing)
 
         syllable_key.append([])
         for u in range(pemdas_count):
             syllable_key[s].append([])
-            
-        for n in range(min_missing,max_number+1):
+
+        for n in range(min_missing, max_number+1):
             for u in range(pemdas_count):
                 if number_names[n]["syllables"][u] < s:
                     break
@@ -191,11 +231,11 @@ def number_names_generator(leave_point,max_number):
                 elif u > 0:
                     break
 
-
         for op in binary:
-            #print(op)
+            # print(op)
 
-            min_left, max_left = get_first_extremes(op, min_missing, max_number)
+            min_left, max_left = get_first_extremes(
+                op, min_missing, max_number)
             for left_syllables in range(s - op["syllables"]):
                 for left_value in syllable_key[left_syllables][op["pemdas_left"]]:
                     if left_value < min_left:
@@ -203,7 +243,8 @@ def number_names_generator(leave_point,max_number):
                     if left_value > max_left:
                         break
 
-                    min_right, max_right = get_second_extremes(op, min_missing, max_number, left_value)
+                    min_right, max_right = get_second_extremes(
+                        op, min_missing, max_number, left_value)
 
                     for right_value in syllable_key[s - op["syllables"] - left_syllables][op["pemdas_right"]]:
                         if right_value < min_right:
@@ -215,20 +256,20 @@ def number_names_generator(leave_point,max_number):
                             and right_value != 2
                             and number_names[left_value]["zeroes"] >= number_names[right_value]["digits"]
                             and (number_names[left_value]["nonzero"] > 1 or number_names[right_value]["nonzero"] > 1)
-                            and number_names[left_value]["names"][1] == number_names[left_value]["names"][2]):
+                                and number_names[left_value]["names"][1] == number_names[left_value]["names"][2]):
                             continue
 
-
-                        op_output, valid_output = get_output(op, left_value, right_value)
+                        op_output, valid_output = get_output(
+                            op, left_value, right_value)
                         if not valid_output:
                             continue
-                        
-                        new_name = (number_names[left_value]["names"][op["pemdas_left"]] 
-                                    + op["text"] 
+
+                        new_name = (number_names[left_value]["names"][op["pemdas_left"]]
+                                    + op["text"]
                                     + number_names[right_value]["names"][op["pemdas_right"]]
                                     + op["suffix"])
-                        
-                        new_equation = number_names[left_value]["equations"][op["pemdas_left"]] 
+
+                        new_equation = number_names[left_value]["equations"][op["pemdas_left"]]
                         if op["id"] == "^":
                             new_equation += " " + superscripts[right_value]
                         else:
@@ -237,8 +278,8 @@ def number_names_generator(leave_point,max_number):
                             else:
                                 new_equation += " " + op["id"] + " "
                             new_equation += number_names[right_value]["equations"][op["pemdas_right"]]
-                        
-                        for u in range(op["pemdas_result"],pemdas_count):
+
+                        for u in range(op["pemdas_result"], pemdas_count):
 
                             if number_names[op_output]["syllables"][u] >= s:
                                 number_names[op_output]["names"][u] = new_name
@@ -249,11 +290,12 @@ def number_names_generator(leave_point,max_number):
                                     syllable_key[s][u].append(op_output)
 
         for op in unary:
-            #print(op)
+            # print(op)
             if s <= op["syllables"]:
                 continue
 
-            min_value, max_value = get_first_extremes(op, min_missing, max_number)
+            min_value, max_value = get_first_extremes(
+                op, min_missing, max_number)
             for input_value in syllable_key[s - op["syllables"]][op["pemdas_input"]]:
                 if input_value < min_value:
                     continue
@@ -265,8 +307,9 @@ def number_names_generator(leave_point,max_number):
                     continue
 
                 new_name = number_names[input_value]["names"][op["pemdas_input"]] + op["text"]
-                new_equation = number_names[input_value]["equations"][op["pemdas_input"]] + " " + op["id"]
-                for u in range(op["pemdas_result"],pemdas_count):
+                new_equation = number_names[input_value]["equations"][op["pemdas_input"]
+                                                                      ] + " " + op["id"]
+                for u in range(op["pemdas_result"], pemdas_count):
                     if number_names[op_output]["syllables"][u] >= s:
                         number_names[op_output]["names"][u] = new_name
                         number_names[op_output]["equations"][u] = new_equation
@@ -274,20 +317,36 @@ def number_names_generator(leave_point,max_number):
                         if number_names[op_output]["syllables"][u] > s:
                             number_names[op_output]["syllables"][u] = s
                             syllable_key[s][u].append(op_output)
-                
 
         for i in range(pemdas_count):
             syllable_key[s][i].sort()
         while number_names[min_missing]["syllables"][-1] <= s:
             min_missing += 1
             if min_missing > leave_point:
-                    break
-        if min_missing > leave_point:
                 break
+        if min_missing > leave_point:
+            break
 
     return number_names[0:leave_point+1]
 
-def get_first_extremes(op,min_missing,max_number):
+
+"""
+This function returns a minimum and maximum plausible value for the left operand, before testing combinations. It depends on the operator:
+
++ For squared (²): left ≥ sqrt(min_missing), ≤ sqrt(max_number)
++ For cubed (³): left ≥ root(3)(min_missing), ≤ root(3)(max_number)
++ For addition (+): left ≥ 6 (smallest non‑zero useful sum), ≤ max_number − 1
++ For multiplication (*): left ≥ 2 (useful multiplier), ≤ sqrt(max_number)
++ For subtraction (−): left ≥ min_missing + 1, ≤ max_number
++ For division (/ or “fraction”): left ≥ min_missing * 2, ≤ max_number
++ For exponentiation (^): left ≥ 2, ≤ max_number**0.2 (5th root) 
+
+✔ Why?
+These are simple bounds so that the result (after applying the operator with some right operand) can still end up between min_missing and max_number, where the program is searching for shorter representations.
+"""
+
+
+def get_first_extremes(op, min_missing, max_number):
     if op["id"] == "²":
         return min_missing**(1/2), max_number**(1/2)
     elif op["id"] == "³":
@@ -302,20 +361,36 @@ def get_first_extremes(op,min_missing,max_number):
         return min_missing*2, max_number
     elif op["id"] == "^":
         return 2, max_number**0.2
-    
-def get_second_extremes(op,min_missing,max_number,left_value):
+
+
+"""
+Once you pick a left operand, this function returns the min and max plausible values for the right operand given the operator and that fixed left:
+
++ For addition: right ≥ 1 and ≤ min(left, max_number − left)
++ For multiplication: right ≥ max(left, ceil(min_missing/left)) and right ≤ floor(max_number / left)
++ For subtraction: right ≥ 1, ≤ left − min_missing
++ For division / “fraction”: right ≥ 2, ≤ left/2
++ For exponentiation (^): right ≥ 5, ≤ log(max_number) / log(left) 
+
+✔ Why?
+Given a fixed left operand, it stops you from trying right operands that will produce values outside the range of interest (too small or too large) before actually computing the result. That trims the search dramatically.
+"""
+
+
+def get_second_extremes(op, min_missing, max_number, left_value):
     if op["id"] == "+":
-        return 1, min(left_value,max_number - left_value)
+        return 1, min(left_value, max_number - left_value)
     elif op["id"] == "*":
-        return max(left_value,min_missing/left_value), max_number/left_value
+        return max(left_value, min_missing/left_value), max_number/left_value
     elif op["id"] == "-":
         return 1, left_value-min_missing
     elif op["id"] == "/" or op["id"] == "fraction":
         return 2, left_value/2
     elif op["id"] == "^":
         return 5, math.log(max_number)/math.log(left_value)
-    
-def get_output(op,left_value,right_value=0):
+
+
+def get_output(op, left_value, right_value=0):
     if op["id"] == "²":
         return left_value**2, True
     if op["id"] == "³":
@@ -333,14 +408,13 @@ def get_output(op,left_value,right_value=0):
             return left_value // right_value, True
         return 0, False
 
+
 def numbers_out(number_names, file_name):
-    with open(file_name,"w",encoding="utf-8") as f:
+    with open(file_name, "w", encoding="utf-8") as f:
         for l in number_names:
-           f.write(str(l["value"]) + "," + l["names"][-1] + "," + l["equations"][-1] + "," + str(l["syllables"][-1])  +"\n")
+            f.write(str(l["value"]) + "," + l["names"][-1] + "," +
+                    l["equations"][-1] + "," + str(l["syllables"][-1]) + "\n")
 
 
-
-
-fast_numbers = number_names_generator(10000,100000)
+fast_numbers = number_names_generator(10000, 100000)
 numbers_out(fast_numbers, 'fastest_numbers.csv')
-
