@@ -52,6 +52,22 @@ number_names = []
 pemdas_count = 6
 
 
+
+def inverse_factorial(x):
+    """
+    Returns the largest integer n such that n! <= x.
+    """
+    if x < 1:
+        return 0
+    res = 1
+    n = 1
+    while True:
+        next_res = res * (n + 1)
+        if next_res > x:
+            return n
+        res = next_res
+        n += 1
+
 def base_syllables(n):
     if n < 20:
         return one_names[n][0][1], one_names[n][0][0], one_names[n][1][1], one_names[n][1][0], 0, 1
@@ -140,6 +156,7 @@ def number_names_generator(leave_point,max_number):
     unary = [
         {"id": "²", "syllables": 1, "text": " squared", "value": 2, "pemdas_input": 2,"pemdas_result": 2},
         {"id": "³", "syllables": 1, "text": " cubed", "value": 3, "pemdas_input": 2,"pemdas_result": 2},
+        {"id": "!", "syllables": 3, "text": " factorial", "value": None, "pemdas_input": 2,"pemdas_result": 2},
     ]
     
     binary = [
@@ -280,6 +297,8 @@ def get_first_extremes(op,min_missing,max_number):
         return min_missing*2, max_number
     elif op["id"] == "^":
         return 2, max_number**0.2
+    elif op["id"] == "!":
+        return inverse_factorial(min_missing - 1) + 1, inverse_factorial(max_number)
     
 def get_second_extremes(op,min_missing,max_number,left_value):
     if op["id"] == "+":
@@ -298,6 +317,8 @@ def get_output(op,left_value,right_value=0):
         return left_value**2, True
     if op["id"] == "³":
         return left_value**3, True
+    elif op["id"] == "!":
+        return math.factorial(left_value), True
     elif op["id"] == "^":
         return left_value**right_value, True
     elif op["id"] == "+":
